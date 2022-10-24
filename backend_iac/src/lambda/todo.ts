@@ -1,5 +1,3 @@
-import { aws_lambda } from 'aws-cdk-lib';
-
 const handler = (event: Record<string, unknown>) => {
   console.log('Event?:', JSON.stringify(event, null, 2));
   console.log('Production?:', process.env.isProduction);
