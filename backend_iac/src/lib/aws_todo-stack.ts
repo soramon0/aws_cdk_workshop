@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { aws_lambda, Stack, StackProps } from 'aws-cdk-lib';
+import { aws_lambda, Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
 export class AwsTodoStack extends Stack {
@@ -10,6 +10,8 @@ export class AwsTodoStack extends Stack {
       code: aws_lambda.Code.fromAsset(join(__dirname, '..', 'lambda')),
       handler: 'todo.handler',
       runtime: aws_lambda.Runtime.NODEJS_16_X,
+      memorySize: 256,
+      timeout: Duration.seconds(10),
     });
   }
 }
