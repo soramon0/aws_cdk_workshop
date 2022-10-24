@@ -2,7 +2,7 @@
   "name": "aws_todo",
   "version": "0.1.0",
   "bin": {
-    "aws_todo": "bin/aws_todo.js"
+    "aws_todo": "src/bin/aws_todo.js"
   },
   "scripts": {
     "build": "tsc",
