@@ -1,5 +1,11 @@
 import { join } from 'path';
-import { aws_lambda, Duration, Stack, StackProps } from 'aws-cdk-lib';
+import {
+  aws_apigateway,
+  aws_lambda,
+  Duration,
+  Stack,
+  StackProps,
+} from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
 export class AwsTodoStack extends Stack {
@@ -12,6 +18,11 @@ export class AwsTodoStack extends Stack {
       runtime: aws_lambda.Runtime.NODEJS_16_X,
       memorySize: 256,
       timeout: Duration.seconds(10),
+      environment: { isProduction: 'false' },
+    });
+
+    new aws_apigateway.LambdaRestApi(this, 'TodoEndpoint', {
+      handler: todoLambda,
     });
   }
 }
