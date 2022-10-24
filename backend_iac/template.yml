@@ -1,0 +1,346 @@
+Resources:
+  TodoLambdaServiceRole1ED23AFA:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: AwsTodoStack/TodoLambda/ServiceRole/Resource
+  TodoLambda8D7FA7F9:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+        S3Key: 5dfd40d57815ceee4b063d5f1afbdde99bc2a10b3da6986de88dc161f84fefe5.zip
+      Role:
+        Fn::GetAtt:
+          - TodoLambdaServiceRole1ED23AFA
+          - Arn
+      Environment:
+        Variables:
+          isProduction: "false"
+      Handler: todo.handler
+      MemorySize: 256
+      Runtime: nodejs16.x
+      Timeout: 10
+    DependsOn:
+      - TodoLambdaServiceRole1ED23AFA
+    Metadata:
+      aws:cdk:path: AwsTodoStack/TodoLambda/Resource
+      aws:asset:path: /home/sora/w/sandbox/aws_todo/backend_iac/src/lambda
+      aws:asset:is-bundled: false
+      aws:asset:property: Code
+  TodoEndpointE2641668:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: TodoEndpoint
+    Metadata:
+      aws:cdk:path: AwsTodoStack/TodoEndpoint/Resource
+  TodoEndpointDeploymentAFE9A021285d3a6011f27899f08698c01a558d32:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId:
+        Ref: TodoEndpointE2641668
+      Description: Automatically created by the RestApi construct
+    DependsOn:
+      - TodoEndpointproxyANY45679EEF
+      - TodoEndpointproxyCB328EC0
+      - TodoEndpointANY0C384F50
+    Metadata:
+      aws:cdk:path: AwsTodoStack/TodoEndpoint/Deployment/Resource
+  TodoEndpointDeploymentStageprod540E1C81:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId:
+        Ref: TodoEndpointE2641668
+      DeploymentId:
+        Ref: TodoEndpointDeploymentAFE9A021285d3a6011f27899f08698c01a558d32
+      StageName: prod
+    Metadata:
+      aws:cdk:path: AwsTodoStack/TodoEndpoint/DeploymentStage.prod/Resource
+  TodoEndpointproxyCB328EC0:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId:
+        Fn::GetAtt:
+          - TodoEndpointE2641668
+          - RootResourceId
+      PathPart: "{proxy+}"
+      RestApiId:
+        Ref: TodoEndpointE2641668
+    Metadata:
+      aws:cdk:path: AwsTodoStack/TodoEndpoint/Default/{proxy+}/Resource
+  TodoEndpointproxyANYApiPermissionAwsTodoStackTodoEndpointA268AA13ANYproxy836019D0:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - TodoLambda8D7FA7F9
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: TodoEndpointE2641668
+            - /
+            - Ref: TodoEndpointDeploymentStageprod540E1C81
+            - /*/*
+    Metadata:
+      aws:cdk:path: AwsTodoStack/TodoEndpoint/Default/{proxy+}/ANY/ApiPermission.AwsTodoStackTodoEndpointA268AA13.ANY..{proxy+}
+  TodoEndpointproxyANYApiPermissionTestAwsTodoStackTodoEndpointA268AA13ANYproxy9E6CE14B:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - TodoLambda8D7FA7F9
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: TodoEndpointE2641668
+            - /test-invoke-stage/*/*
+    Metadata:
+      aws:cdk:path: AwsTodoStack/TodoEndpoint/Default/{proxy+}/ANY/ApiPermission.Test.AwsTodoStackTodoEndpointA268AA13.ANY..{proxy+}
+  TodoEndpointproxyANY45679EEF:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: ANY
+      ResourceId:
+        Ref: TodoEndpointproxyCB328EC0
+      RestApiId:
+        Ref: TodoEndpointE2641668
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - ":apigateway:"
+              - Ref: AWS::Region
+              - :lambda:path/2015-03-31/functions/
+              - Fn::GetAtt:
+                  - TodoLambda8D7FA7F9
+                  - Arn
+              - /invocations
+    Metadata:
+      aws:cdk:path: AwsTodoStack/TodoEndpoint/Default/{proxy+}/ANY/Resource
+  TodoEndpointANYApiPermissionAwsTodoStackTodoEndpointA268AA13ANYCF8CD4C4:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - TodoLambda8D7FA7F9
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: TodoEndpointE2641668
+            - /
+            - Ref: TodoEndpointDeploymentStageprod540E1C81
+            - /*/
+    Metadata:
+      aws:cdk:path: AwsTodoStack/TodoEndpoint/Default/ANY/ApiPermission.AwsTodoStackTodoEndpointA268AA13.ANY..
+  TodoEndpointANYApiPermissionTestAwsTodoStackTodoEndpointA268AA13ANY8F2DB133:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - TodoLambda8D7FA7F9
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: TodoEndpointE2641668
+            - /test-invoke-stage/*/
+    Metadata:
+      aws:cdk:path: AwsTodoStack/TodoEndpoint/Default/ANY/ApiPermission.Test.AwsTodoStackTodoEndpointA268AA13.ANY..
+  TodoEndpointANY0C384F50:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: ANY
+      ResourceId:
+        Fn::GetAtt:
+          - TodoEndpointE2641668
+          - RootResourceId
+      RestApiId:
+        Ref: TodoEndpointE2641668
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - ":apigateway:"
+              - Ref: AWS::Region
+              - :lambda:path/2015-03-31/functions/
+              - Fn::GetAtt:
+                  - TodoLambda8D7FA7F9
+                  - Arn
+              - /invocations
+    Metadata:
+      aws:cdk:path: AwsTodoStack/TodoEndpoint/Default/ANY/Resource
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Analytics: v2:deflate64:H4sIAAAAAAAA/1WQ0U7DMAxFv4X31DBA8LwN8QRiKh8wZYnpvDZJVTuMquq/k6RDGk/3+Dq5dnIPj89wd6PPXBnbVh0dYPoUbVqVrP3UaXewGqbX6I1Q8Gr75a95h4Mj5lTNirSDqQ4d5kbWWfHDXjOjMKyzpBo20bQoG82odE+NFjzrEaa3MqhGlnVPJeCCL9h3YXToJbtXVdqyKaMWSOdDHAyW5N0QfsY/55K28DvKMdhsLTTPqqyWQ8g3ufERpY/y71bibfCWpDzUB4tw4tvv1ROs8u+dmKgaohdyCPWiv+yBICVZAQAA
+    Metadata:
+      aws:cdk:path: AwsTodoStack/CDKMetadata/Default
+    Condition: CDKMetadataAvailable
+Outputs:
+  TodoEndpoint48B7A0A0:
+    Value:
+      Fn::Join:
+        - ""
+        - - https://
+          - Ref: TodoEndpointE2641668
+          - .execute-api.
+          - Ref: AWS::Region
+          - "."
+          - Ref: AWS::URLSuffix
+          - /
+          - Ref: TodoEndpointDeploymentStageprod540E1C81
+          - /
+Conditions:
+  CDKMetadataAvailable:
+    Fn::Or:
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - af-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-northwest-1
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - sa-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-2
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-2
+Parameters:
+  BootstrapVersion:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /cdk-bootstrap/hnb659fds/version
+    Description: Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]
+Rules:
+  CheckBootstrapVersion:
+    Assertions:
+      - Assert:
+          Fn::Not:
+            - Fn::Contains:
+                - - "1"
+                  - "2"
+                  - "3"
+                  - "4"
+                  - "5"
+                - Ref: BootstrapVersion
+        AssertDescription: CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.
+
